@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>促成马来西亚成立的重要领袖 | 拼图与知识大挑战</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            user-select: none;
+            min-h-screen;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .leader-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .leader-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 20px rgba(251, 191, 36, 0.2);
+        }
+
+        /* Puzzle Tile Styling */
+        .puzzle-slot {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px dashed rgba(251, 191, 36, 0.4);
+            transition: all 0.2s ease;
+        }
+        .puzzle-slot.active-target {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
+        }
+
+        .btn-bounce {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4)); }
+            50% { filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.8)); }
+        }
+        .glow-effect {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-400 selection:text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/90 border-b border-slate-700/80 p-4 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 w-11 h-11 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg">
+                    👑
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-extrabold text-amber-400 leading-tight">建国先贤拼图：重要历史领袖</h1>
+                    <p class="text-xs text-slate-400">Tokoh-tokoh Pembentukan Malaysia (Tahun 6)</p>
+                </div>
+            </div>
+
+            <!-- Header Badge & Score -->
+            <div class="flex items-center gap-3 bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-2xl">
+                <span class="text-xs font-bold text-slate-400">完成进度:</span>
+                <span id="header-completed-count" class="text-lg md:text-xl font-black text-amber-400">0 / 6 领袖</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto p-4 w-full flex-grow my-2">
+
+        <!-- Top Selection Bar -->
+        <div class="glass-card rounded-3xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xs md:text-sm font-bold text-slate-300">🎮 游戏模式：</span>
+                <button onclick="switchGameMode('puzzle')" id="btn-mode-puzzle" class="px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-amber-500 text-slate-950 shadow-md transition-all">
+                    🧩 混合碎片拼图大挑战
+                </button>
+                <button onclick="switchGameMode('match')" id="btn-mode-match" class="px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+                    🃏 领袖与贡献对对碰
+                </button>
+            </div>
+            <div class="text-xs text-amber-300/80 italic">
+                💡 提示：碎片已全面打乱！随时点击领袖头像旁的【📖 个人信息】查看提示！
+            </div>
+        </div>
+
+        <!-- ================= MODE 1: PUZZLE MODE ================= -->
+        <div id="section-puzzle-mode" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left: Leader Target Selector Cards -->
+            <div class="lg:col-span-5 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>👥</span> 6位历史领袖 (选择目标)
+                    </h3>
+                    <span class="text-[11px] text-slate-400">点击头像可查档案 📖</span>
+                </div>
+                <div id="leaders-list-container" class="space-y-2.5">
+                    <!-- Dynamic rendering of leaders buttons -->
+                </div>
+            </div>
+
+            <!-- Right: Active Leader Puzzle Canvas & Mixed Pool -->
+            <div class="lg:col-span-7 space-y-4">
+                <div id="puzzle-stage-card" class="glass-card rounded-3xl p-6 relative overflow-hidden min-h-[320px] flex flex-col justify-between border-2 border-amber-500/30">
+                    <!-- Puzzle Title & Area injected by JS -->
+                </div>
+
+                <!-- Mixed Pieces Pool Container (All 18 Pieces Shuffled) -->
+                <div class="glass-card rounded-3xl p-5 space-y-3 border border-slate-700">
+                    <div class="flex justify-between items-center border-b border-slate-700/80 pb-2">
+                        <span class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
+                            <span>🎲</span> 打乱的碎片池 (点击选中，再填入上方框架)
+                        </span>
+                        <button onclick="shuffleMixedPool()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-600">
+                            🔀 重新洗牌
+                        </button>
+                    </div>
+                    
+                    <div id="mixed-pool-container" class="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto p-1">
+                        <!-- Mixed shuffled tiles -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= MODE 2: MATCHING CARD MODE ================= -->
+        <div id="section-match-mode" class="hidden glass-card rounded-3xl p-6 space-y-6">
+            <div class="text-center space-y-1">
+                <h3 class="text-2xl font-black text-amber-400">🃏 历史领袖与贡献卡片连连看</h3>
+                <p class="text-xs md:text-sm text-slate-300">将左侧的【领袖人物】与右侧对应的【历史贡献与地区】正确连线！</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <!-- Left: Leader Cards -->
+                <div id="match-leaders-column" class="space-y-3">
+                    <!-- Leader choices -->
+                </div>
+
+                <!-- Right: Contribution Cards -->
+                <div id="match-roles-column" class="space-y-3">
+                    <!-- Contribution choices -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Leader Fact Dossier -->
+    <div id="modal-dossier" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-2 border-amber-400/80 rounded-3xl p-6 max-w-lg w-full space-y-5 shadow-2xl relative">
+            <button onclick="closeDossierModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
+            
+            <div class="flex items-center gap-4 border-b border-slate-700 pb-4">
+                <div id="dossier-avatar" class="w-20 h-20 rounded-2xl bg-slate-800 border-2 border-amber-400 flex items-center justify-center text-4xl shadow-inner">
+                    👤
+                </div>
+                <div>
+                    <span id="dossier-region" class="bg-amber-400/20 text-amber-300 text-[10px] font-black px-2.5 py-1 rounded-md border border-amber-400/30">
+                        MALAYSIA
+                    </span>
+                    <h3 id="dossier-name" class="text-xl font-black text-white mt-1">东姑阿都拉曼</h3>
+                    <p id="dossier-title-bm" class="text-xs text-amber-400 font-bold">Tunku Abdul Rahman</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs md:text-sm">
+                <h4 class="font-bold text-slate-400 uppercase tracking-wider">🌟 促成马来西亚的关键贡献：</h4>
+                <ul id="dossier-contributions" class="space-y-2 text-slate-200">
+                    <!-- Dynamic -->
+                </ul>
+            </div>
+
+            <button onclick="closeDossierModal()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-sm shadow-md btn-bounce">
+                解开下一个领袖拼图！
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Victory Certificate -->
+    <div id="modal-victory" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-4 border-amber-400 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl">
+            <div class="text-7xl animate-bounce">🏆</div>
+            <h3 class="text-3xl font-black text-amber-400">太棒了！拼图大满贯！</h3>
+            <p class="text-slate-300 text-sm">你成功解锁了所有 6 位促成马来西亚成立的关键领袖！</p>
+
+            <div class="bg-slate-800 border border-amber-400/30 p-4 rounded-2xl text-left text-xs text-slate-300 space-y-2">
+                <div class="font-bold text-amber-400 border-b border-slate-700 pb-1 text-center">
+                    📜 历史建国领袖勋章
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                    <div>1. 东姑阿都拉曼 (国父)</div>
+                    <div>2. 敦阿都拉萨 (JAK副主席)</div>
+                    <div>3. 敦史蒂芬斯 (JPPM主席)</div>
+                    <div>4. 敦达图·慕斯达法 (沙巴)</div>
+                    <div>5. 天猛公朱加 (砂拉越)</div>
+                    <div>6. 李光耀 (新加坡)</div>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-base shadow-lg btn-bounce">
+                🔄 重新开启拼图挑战
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-500 py-4 text-center text-xs border-t border-slate-800">
+        <p>适合小学六年级 (Tahun 6) 历史课单元 5 教学辅助 | Tokoh-tokoh Pembentukan Malaysia</p>
+    </footer>
+
+    <!-- App Logic Scripts -->
+    <script>
+        // 6 Key Historical Leaders Data
+        const leadersData = [
+            {
+                id: 1,
+                name: "东姑阿都拉曼",
+                nameBM: "Tunku Abdul Rahman",
+                title: "马来亚首相 / 马来西亚国父",
+                region: "马来亚 (Persekutuan Tanah Melayu)",
+                avatar: "👑",
+                avatarBg: "bg-red-500/20 text-red-400 border-red-500/40",
+                pieces: [
+                    { id: "1-1", text: "马来亚首相 (PTM)" },
+                    { id: "1-2", text: "1961年提出马来西亚概念" },
+                    { id: "1-3", text: "被尊称为马来西亚国父" }
+                ],
+                contributions: [
+                    "担任马来亚联合邦首相。",
+                    "在1961年5月27日于新加坡提出成立马来西亚的构想。",
+                    "积极奔走于各地，推动马来西亚的成立。",
+                    "被称为马来西亚国父（Bapa Malaysia）。"
+                ]
+            },
+            {
+                id: 2,
+                name: "敦阿都拉萨",
+                nameBM: "Tun Abdul Razak",
+                title: "政府间委员会 (JAK) 副主席",
+                region: "马来亚 (Persekutuan Tanah Melayar)",
+                avatar: "🏛️",
+                avatarBg: "bg-blue-500/20 text-blue-400 border-blue-500/40",
+                pieces: [
+                    { id: "2-1", text: "担任政府间委员会(JAK)副主席" },
+                    { id: "2-2", text: "协助东姑阿都拉曼推动成立" },
+                    { id: "2-3", text: "保障沙巴与砂拉越人民权益" }
+                ],
+                contributions: [
+                    "全力协助东姑阿都拉曼推动马来西亚的成立。",
+                    "担任马来西亚政府间委员会（JAK/IGC）副主席。",
+                    "参与讨论并极力保障沙巴和砂拉越人民在宪法中的权益。"
+                ]
+            },
+            {
+                id: 3,
+                name: "敦莫哈末弗阿德·史蒂芬斯",
+                nameBM: "Tun Fuad Stephens (Donald Stephens)",
+                title: "团结协商委员会 (JPPM) 主席",
+                region: "沙巴 (Sabah)",
+                avatar: "🤝",
+                avatarBg: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+                pieces: [
+                    { id: "3-1", text: "沙巴重要政治领袖" },
+                    { id: "3-2", text: "担任团结协商委员会(JPPM)主席" },
+                    { id: "3-3", text: "为沙巴人民争取宪法权益" }
+                ],
+                contributions: [
+                    "沙巴（北婆罗洲）的核心政治领袖。",
+                    "1961年担任马来西亚团结协商委员会（JPPM）主席。",
+                    "向沙巴人民解释概念，并为沙巴人民争取最大权益。"
+                ]
+            },
+            {
+                id: 4,
+                name: "敦达图·慕斯达法",
+                nameBM: "Tun Datu Mustapha",
+                title: "沙巴重要领袖",
+                region: "沙巴 (Sabah)",
+                avatar: "⭐",
+                avatarBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+                pieces: [
+                    { id: "4-1", text: "沙巴重要政治领袖" },
+                    { id: "4-2", text: "坚决支持沙巴加入马来西亚" },
+                    { id: "4-3", text: "在当地宣传马来西亚的好处" }
+                ],
+                contributions: [
+                    "沙巴极具影响力的政治领袖。",
+                    "高度支持沙巴加入马来西亚。",
+                    "在沙巴民间积极宣传，协助推动马来西亚的顺利成立。"
+                ]
+            },
+            {
+                id: 5,
+                name: "天猛公朱加",
+                nameBM: "Temenggong Jugah anak Barieng",
+                title: "砂拉越伊班族领袖",
+                region: "砂拉越 (Sarawak)",
+                avatar: "🌿",
+                avatarBg: "bg-purple-500/20 text-purple-400 border-purple-500/40",
+                pieces: [
+                    { id: "5-1", text: "砂拉越原住民伊班族领袖" },
+                    { id: "5-2", text: "支持砂拉越加入马来西亚" },
+                    { id: "5-3", text: "争取砂拉越内部原住民支持" }
+                ],
+                contributions: [
+                    "砂拉越重要的伊班族（Iban）领袖。",
+                    "代表砂拉越原住民支持加入马来西亚。",
+                    "协助消除当地疑虑，争取砂拉越人民对合并的全力支持。"
+                ]
+            },
+            {
+                id: 6,
+                name: "李光耀",
+                nameBM: "Lee Kuan Yew",
+                title: "新加坡总理",
+                region: "新加坡 (Singapura)",
+                avatar: "🏙️",
+                avatarBg: "bg-sky-500/20 text-sky-400 border-sky-500/40",
+                pieces: [
+                    { id: "6-1", text: "新加坡总理" },
+                    { id: "6-2", text: "推动新加坡与马来亚合并" },
+                    { id: "6-3", text: "举行 1962 全民投票 (Referendum)" }
+                ],
+                contributions: [
+                    "时任新加坡总理。",
+                    "积极支持新加坡与马来亚合并成立马来西亚。",
+                    "于1962年推动新加坡全民投票（Referendum），促成新加坡加入。"
+                ]
+            }
+        ];
+
+        // State Management
+        let selectedLeaderId = 1;
+        let completedLeaderIds = new Set();
+        let selectedPuzzleTileId = null;
+        let currentMode = 'puzzle'; // 'puzzle' or 'match'
+        
+        // Placed pieces tracker: Map of pieceId -> leaderId where it's correctly placed
+        let placedPieces = new Map();
+        
+        // Shuffled All Mixed Pieces Pool
+        let shuffledAllPieces = [];
+
+        // Initialize Application
+        window.onload = function() {
+            initMixedPool();
+            renderLeaderButtons();
+            loadPuzzleStage(selectedLeaderId);
+            initMatchMode();
+        };
+
+        function initMixedPool() {
+            let all = [];
+            leadersData.forEach(leader => {
+                leader.pieces.forEach(p => {
+                    all.push({
+                        ...p,
+                        ownerLeaderId: leader.id,
+                        ownerName: leader.name
+                    });
+                });
+            });
+            // Shuffle
+            shuffledAllPieces = all.sort(() => Math.random() - 0.5);
+            renderMixedPool();
+        }
+
+        function shuffleMixedPool() {
+            shuffledAllPieces.sort(() => Math.random() - 0.5);
+            renderMixedPool();
+        }
+
+        function renderMixedPool() {
+            const pool = document.getElementById('mixed-pool-container');
+            const availablePieces = shuffledAllPieces.filter(p => !placedPieces.has(p.id));
+
+            if (availablePieces.length === 0) {
+                pool.innerHTML = `
+                    <div class="w-full text-center py-4 text-emerald-400 font-bold text-xs">
+                        🎉 所有 18 个历史碎片已全部成功归位！
+                    </div>
+                `;
+                return;
+            }
+
+            pool.innerHTML = availablePieces.map(tile => {
+                const isSelected = selectedPuzzleTileId === tile.id;
+                return `
+                    <button onclick="selectTilePiece('${tile.id}')" id="tile-${tile.id}" class="btn-bounce text-xs font-bold p-2.5 px-3 rounded-xl text-left border transition-all ${isSelected ? 'border-amber-400 bg-amber-500/20 text-amber-300 shadow-md ring-2 ring-amber-400/50' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'}">
+                        📌 ${tile.text}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function switchGameMode(mode) {
+            currentMode = mode;
+            const puzzleSec = document.getElementById('section-puzzle-mode');
+            const matchSec = document.getElementById('section-match-mode');
+            const btnPuzzle = document.getElementById('btn-mode-puzzle');
+            const btnMatch = document.getElementById('btn-mode-match');
+
+            if (mode === 'puzzle') {
+                puzzleSec.classList.remove('hidden');
+                matchSec.classList.add('hidden');
+                btnPuzzle.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-amber-500 text-slate-950 shadow-md transition-all";
+                btnMatch.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all";
+            } else {
+                puzzleSec.classList.add('hidden');
+                matchSec.classList.remove('hidden');
+                btnMatch.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-amber-500 text-slate-950 shadow-md transition-all";
+                btnPuzzle.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all";
+            }
+        }
+
+        // Render Leader Cards Panel on Left
+        function renderLeaderButtons() {
+            const container = document.getElementById('leaders-list-container');
+            container.innerHTML = leadersData.map(leader => {
+                const isCompleted = completedLeaderIds.has(leader.id);
+                const isSelected = selectedLeaderId === leader.id;
+
+                // Count placed pieces for this leader
+                const placedCount = leader.pieces.filter(p => placedPieces.has(p.id)).length;
+
+                return `
+                    <div class="leader-card p-3 rounded-2xl flex items-center justify-between border-2 ${isSelected ? 'border-amber-400 bg-slate-800' : 'border-slate-800 bg-slate-900/60'}">
+                        <div onclick="selectLeader(${leader.id})" class="flex items-center gap-3 cursor-pointer flex-1">
+                            <div class="w-10 h-10 rounded-xl ${leader.avatarBg} border flex items-center justify-center text-xl">
+                                ${leader.avatar}
+                            </div>
+                            <div>
+                                <h4 class="font-black text-sm text-white">${leader.name}</h4>
+                                <p class="text-[11px] text-slate-400">${leader.nameBM}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <!-- Info Dossier Button -->
+                            <button onclick="openDossier(${leader.id})" title="查看个人信息" class="bg-slate-800 hover:bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-1.5 rounded-xl text-xs font-bold btn-bounce">
+                                📖 档案
+                            </button>
+
+                            <div onclick="selectLeader(${leader.id})" class="cursor-pointer">
+                                ${isCompleted ? `
+                                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+                                        <i class="fa-solid fa-check"></i> 完整
+                                    </span>
+                                ` : `
+                                    <span class="text-xs text-amber-400 font-bold bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded-lg">
+                                        ${placedCount}/3
+                                    </span>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('header-completed-count').innerText = `${completedLeaderIds.size} / ${leadersData.length}`;
+        }
+
+        function selectLeader(id) {
+            selectedLeaderId = id;
+            renderLeaderButtons();
+            loadPuzzleStage(selectedLeaderId);
+        }
+
+        // ================= PUZZLE CANVAS LOGIC =================
+        function loadPuzzleStage(leaderId) {
+            const leader = leadersData.find(l => l.id === leaderId);
+            const container = document.getElementById('puzzle-stage-card');
+            const isCompleted = completedLeaderIds.has(leaderId);
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <!-- Title Area -->
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700/80 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl ${leader.avatarBg} border flex items-center justify-center text-2xl shadow-inner">
+                                ${leader.avatar}
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">${leader.region}</span>
+                                <h3 class="text-xl font-black text-white">${leader.name} (${leader.nameBM})</h3>
+                            </div>
+                        </div>
+
+                        <!-- Read Dossier Info button -->
+                        <button onclick="openDossier(${leader.id})" class="text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/60 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 btn-bounce">
+                            <i class="fa-solid fa-book-open"></i> 查看【${leader.name}】个人信息
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-300">
+                        🎯 拼图目标：从下方【打乱的碎片池】中找出属于 <strong>${leader.name}</strong> 的 3 块历史事实，点击填入框中！
+                    </p>
+
+                    <!-- Slots Stage (Target Grid) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-2">
+                        ${leader.pieces.map((piece, idx) => {
+                            const isPlaced = placedPieces.has(piece.id);
+                            return `
+                                <div id="slot-${piece.id}" onclick="placePieceInSlot('${piece.id}')" class="puzzle-slot rounded-2xl p-4 min-h-[110px] flex flex-col justify-between cursor-pointer border-2 ${isPlaced ? 'border-emerald-500/60 bg-emerald-500/10' : ''}">
+                                    <div class="text-[10px] font-bold text-slate-400 uppercase">历史事实 #${idx + 1}</div>
+                                    <div id="slot-content-${piece.id}" class="text-xs font-bold ${isPlaced ? 'text-amber-300' : 'text-slate-400 italic'}">
+                                        ${isPlaced ? piece.text : '点击下方选中的碎片填入...'}
+                                    </div>
+                                    <div id="slot-status-${piece.id}" class="text-[10px] text-right font-bold ${isPlaced ? 'text-emerald-400' : 'text-slate-500'}">
+                                        ${isPlaced ? '✅ 已匹配' : '待填入'}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    ${isCompleted ? `
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-2xl text-center flex items-center justify-between">
+                            <div class="text-emerald-400 font-bold text-xs">🎉 恭喜！${leader.name} 的 3 块拼图均已拼合成功！</div>
+                            <button onclick="openDossier(${leader.id})" class="bg-emerald-500 text-slate-950 px-3 py-1 rounded-xl text-xs font-bold btn-bounce">
+                                📖 详细复习档案
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Tile Selection Logic
+        function selectTilePiece(pieceId) {
+            selectedPuzzleTileId = pieceId;
+            renderMixedPool();
+        }
+
+        function placePieceInSlot(slotPieceId) {
+            if (completedLeaderIds.has(selectedLeaderId)) return;
+            if (!selectedPuzzleTileId) {
+                alert("请先在下方【打乱的碎片池】中点击选中一个碎片！");
+                return;
+            }
+
+            if (selectedPuzzleTileId === slotPieceId) {
+                // Correct match!
+                placedPieces.set(slotPieceId, selectedLeaderId);
+                selectedPuzzleTileId = null;
+
+                const leader = leadersData.find(l => l.id === selectedLeaderId);
+                
+                // Check if all 3 slots filled for this leader
+                const allFilled = leader.pieces.every(p => placedPieces.has(p.id));
+
+                if (allFilled) {
+                    completedLeaderIds.add(selectedLeaderId);
+                    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                }
+
+                renderLeaderButtons();
+                loadPuzzleStage(selectedLeaderId);
+                renderMixedPool();
+
+                if (completedLeaderIds.size === leadersData.length) {
+                    setTimeout(() => {
+                        document.getElementById('modal-victory').classList.remove('hidden');
+                        confetti({ particleCount: 150, spread: 90 });
+                    }, 500);
+                }
+
+            } else {
+                // Wrong slot match
+                alert("❌ 这个碎片不属于这位领袖，或者不符合这个位置哦！\n\n💡 提示：可以随时点击上面的【查看个人信息】按钮查阅档案！");
+            }
+        }
+
+        // ================= MATCH MODE LOGIC =================
+        function initMatchMode() {
+            const leadersCol = document.getElementById('match-leaders-column');
+            const rolesCol = document.getElementById('match-roles-column');
+
+            // Shuffle roles for matching challenge
+            const shuffledLeaders = [...leadersData];
+            const shuffledRoles = [...leadersData].sort(() => Math.random() - 0.5);
+
+            leadersCol.innerHTML = shuffledLeaders.map(l => `
+                <div onclick="selectMatchLeader(${l.id})" id="match-l-${l.id}" class="p-3 rounded-2xl bg-slate-900/80 border-2 border-slate-700 hover:border-amber-400 cursor-pointer flex items-center gap-3 transition-all">
+                    <div class="w-10 h-10 rounded-xl ${l.avatarBg} border flex items-center justify-center text-xl">
+                        ${l.avatar}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-white">${l.name}</h4>
+                        <p class="text-[10px] text-slate-400">${l.region}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            rolesCol.innerHTML = shuffledRoles.map(r => `
+                <div onclick="selectMatchRole(${r.id})" id="match-r-${r.id}" class="p-3.5 rounded-2xl bg-slate-900/80 border-2 border-slate-700 hover:border-amber-400 cursor-pointer text-xs font-bold text-slate-200 transition-all">
+                    ⭐ ${r.title} (${r.pieces[1].text})
+                </div>
+            `).join('');
+        }
+
+        function selectMatchLeader(id) {
+            document.querySelectorAll('[id^="match-l-"]').forEach(el => {
+                el.classList.remove('border-amber-400', 'bg-amber-500/20');
+            });
+            selectedMatchLeader = id;
+            document.getElementById(`match-l-${id}`).classList.add('border-amber-400', 'bg-amber-500/20');
+        }
+
+        function selectMatchRole(roleId) {
+            if (!selectedMatchLeader) {
+                alert("请先选择左边的【历史领袖】！");
+                return;
+            }
+
+            if (selectedMatchLeader === roleId) {
+                // Match success!
+                matchedPairsCount++;
+                const lCard = document.getElementById(`match-l-${roleId}`);
+                const rCard = document.getElementById(`match-r-${roleId}`);
+
+                lCard.className = "p-3 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 opacity-60 pointer-events-none flex items-center gap-3";
+                rCard.className = "p-3.5 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 text-xs font-bold text-emerald-300 opacity-60 pointer-events-none";
+
+                selectedMatchLeader = null;
+
+                if (matchedPairsCount === leadersData.length) {
+                    confetti({ particleCount: 150, spread: 90 });
+                    setTimeout(() => {
+                        document.getElementById('modal-victory').classList.remove('hidden');
+                    }, 500);
+                }
+            } else {
+                alert("连线不匹配，请重新思考该领袖的身份与贡献！");
+            }
+        }
+
+        // Modal Handlers
+        function openDossier(id) {
+            const leader = leadersData.find(l => l.id === id);
+            document.getElementById('dossier-avatar').innerText = leader.avatar;
+            document.getElementById('dossier-name').innerText = leader.name;
+            document.getElementById('dossier-title-bm').innerText = `${leader.nameBM} (${leader.title})`;
+            document.getElementById('dossier-region').innerText = leader.region;
+
+            const contribUl = document.getElementById('dossier-contributions');
+            contribUl.innerHTML = leader.contributions.map(c => `
+                <li class="flex items-start gap-2 bg-slate-800 p-2.5 rounded-xl border border-slate-700">
+                    <span class="text-amber-400 font-bold">•</span>
+                    <span>${c}</span>
+                </li>
+            `).join('');
+
+            document.getElementById('modal-dossier').classList.remove('hidden');
+        }
+
+        function closeDossierModal() {
+            document.getElementById('modal-dossier').classList.add('hidden');
+            if (completedLeaderIds.size === leadersData.length) {
+                document.getElementById('modal-victory').classList.remove('hidden');
+            }
+        }
+
+        function restartGame() {
+            completedLeaderIds.clear();
+            placedPieces.clear();
+            selectedLeaderId = 1;
+            selectedPuzzleTileId = null;
+            matchedPairsCount = 0;
+            selectedMatchLeader = null;
+            document.getElementById('modal-victory').classList.add('hidden');
+            initMixedPool();
+            renderLeaderButtons();
+            loadPuzzleStage(selectedLeaderId);
+            initMatchMode();
+        }
+    </script>
+</body>
+</html>
